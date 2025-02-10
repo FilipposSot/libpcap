@@ -29,7 +29,6 @@ cc_library(
         "-w",
         "-DBUILDING_PCAP",
         "-DHAVE_CONFIG_H",
-        "-I$(GENDIR)/libpcap",  # For config.h.
         "-Dpcap_EXPORTS",
         "-fno-sanitize=alignment",  # TODO(b/299519097)
     ],
