@@ -47,8 +47,7 @@ cc_library(
         "pcap",
     ],
     hdrs = glob(["**/*.h"]),
-    data = [":grammar_lib",
-            ":scanner_lib"],
+    data = [":grammar_lib"],
     
 )
 
@@ -57,7 +56,8 @@ bison_cc_library(
     src = "grammar.y",
 )
 
-flex_cc_library(
-    name = "scanner_lib",
-    src = "scanner.l",
-)
+# flex_cc_library(
+#     name = "scanner_lib",
+#     src = "scanner.l",
+#     deps = [":config_h"],
+# )
