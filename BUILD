@@ -1,36 +1,62 @@
-load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
-load("@rules_license//rules:license.bzl", "license")
+load("@rules_bison//bison:bison.bzl", "bison_cc_library")
+load("@rules_flex//flex:flex.bzl", "flex_cc_library")
 
-package(
-    default_applicable_licenses = [":license"],
-    default_visibility = ["//visibility:public"],
-)
+_workspace_root = package_relative_label("invalid").workspace_root
 
-license(
-    name = "license",
-    package_name = "libpcap",
-)
-
-filegroup(
-    name = "all_srcs",
-    srcs = glob(["**"]),
-)
-
-cmake(
-    name = "libpcap",
-    build_args = [
-        "-j4",
+genrule(
+    name = "config_h",
+    srcs = ["cmakeconfig.h.in"],
+    outs = [
+        "config.h",
     ],
-    env = {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_BUILD_PARALLEL_LEVEL": "4",
-    },
-    cache_entries = {
-           "BUILD_SHARED_LIBS": "OFF",},
+    cmd = "awk '{ gsub(/^#cmakedefine/, \"//cmakedefine\"); print; }' $(<) > $(@)",
+)
+
+cc_library(
+    name = "pcap_lib",
+    srcs = [
+        "bpf_dump.c",
+        "bpf_filter.c",
+        "bpf_image.c",
+        "config.h",
+        "etherent.c",
+        "fad-getad.c",
+        "fmtutils.c",
+        "gencode.c",
+        "missing/strlcat.c",
+        "missing/strlcpy.c",
+        "nametoaddr.c",
+        "optimize.c",
+        "pcap.c",
+        "pcap-common.c",
+        "pcap-linux.c",
+        "pcap-netfilter-linux.c",
+        "pcap-usb-linux.c",
+        "savefile.c",
+        "sf-pcap.c",
+        "sf-pcapng.c",
+    ],
+    hdrs = [":config_h"],
+    copts = [
+        "-w",
+        "-I" +_workspace_root + "pcap",
+        "-DBUILDING_PCAP",
+        "-DHAVE_CONFIG_H",
+        "-Dpcap_EXPORTS",
+        "-fno-sanitize=alignment",  # TODO(b/299519097)
+    ],
     includes = [
-      ".",
-      "pcap",
+        "pcap",
     ],
-    lib_source = ":all_srcs",
-    out_static_libs = ["libpcap.a"],
+    textual_hdrs = glob(["**/*.h"]),
+)
+
+bison_cc_library(
+    name = "grammar_lib",
+    src = "grammar.y",
+)
+
+flex_cc_library(
+    name = "scanner_lib",
+    src = "scanner.l",
 )
