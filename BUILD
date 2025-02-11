@@ -3,14 +3,22 @@ load("@rules_flex//flex:flex.bzl", "flex_cc_library")
 
 _workspace_root = package_relative_label("invalid").workspace_root
 
+# genrule(
+#     name = "config_h",
+#     srcs = ["cmakeconfig.h.in"],
+#     outs = [
+#         "config.h",
+#     ],
+#     cmd = "awk '{ gsub(/^#cmakedefine/, \"//cmakedefine\"); print; }' $(<) > $(@)",
+# )
+
 genrule(
-    name = "config_h",
-    srcs = ["config.h.in"],
-    outs = [
-        "config.h",
-    ],
-    cmd = "awk '{ gsub(/^#cmakedefine/, \"//cmakedefine\"); print; }' $(<) > $(@)",
+    name = 'config_h',
+    srcs = ['config.h.in'],
+    outs = ['config.h'],
+    cmd = 'cp $< $@',
 )
+
 
 cc_library(
     name = "pcap_lib",
@@ -47,17 +55,17 @@ cc_library(
         "pcap",
     ],
     hdrs = glob(["**/*.h"]),
-    data = [":grammar_lib"],
+    # data = [":grammar_lib"],
     
 )
 
-bison_cc_library(
-    name = "grammar_lib",
-    src = "grammar.y",
-)
-
-# flex_cc_library(
-#     name = "scanner_lib",
-#     src = "scanner.l",
-#     deps = [":config_h"],
+# bison_cc_library(
+#     name = "grammar_lib",
+#     src = "grammar.y",
 # )
+
+flex_cc_library(
+    name = "scanner_lib",
+    src = "scanner.l",
+    deps = [":config_h"],
+)
