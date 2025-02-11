@@ -5,7 +5,7 @@ _workspace_root = package_relative_label("invalid").workspace_root
 
 genrule(
     name = "config_h",
-    srcs = ["cmakeconfig.h.in"],
+    srcs = ["config.h.in"],
     outs = [
         "config.h",
     ],
@@ -18,7 +18,6 @@ cc_library(
         "bpf_dump.c",
         "bpf_filter.c",
         "bpf_image.c",
-        "config.h",
         "etherent.c",
         "fad-getad.c",
         "fmtutils.c",
@@ -36,7 +35,6 @@ cc_library(
         "sf-pcap.c",
         "sf-pcapng.c",
     ],
-    hdrs = [":config_h"],
     copts = [
         "-w",
         "-I" +_workspace_root + "pcap",
@@ -48,7 +46,10 @@ cc_library(
     includes = [
         "pcap",
     ],
-    textual_hdrs = glob(["**/*.h"]),
+    hdrs = glob(["**/*.h"]),
+    data = [":grammar_lib",
+            ":scanner_lib"],
+    
 )
 
 bison_cc_library(
